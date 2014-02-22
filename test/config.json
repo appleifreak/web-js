@@ -1,0 +1,8 @@
+{
+	"sandbox": {
+		"transformers": {
+			"coffee": true
+			// "template": false
+		}
+	}
+}
