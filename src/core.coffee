@@ -1,28 +1,11 @@
 _ = require "underscore"
 express = require "express"
-path = require "path"
 fs = require "fs"
-vm = require "vm"
 {Minimatch} = require "minimatch"
 {isMatch} = require "./helpers"
+createNewModuleContext = require "./module"
 
 config = $conf.get "sandbox"
-
-coreModules = [ "assert", "buffer", "child_process", "cluster", "console", "constants", "crypto", "dgram", "dns", "domain", "events", "freelist", "fs", "http", "https", "module", "net", "os", "path", "punycode", "querystring", "readline", "repl", "smalloc", "stream", "string_decoder", "sys", "timers", "tls", "tracing", "tty", "url", "util", "vm", "zlib" ]
-
-resolve = (lookup, _module) ->
-	if resolve.isCoreModule(lookup) then id = lookup
-	else if /^\.{0,2}\//.test(lookup)
-		dir = path.dirname _module.filename
-		id = require.resolve path.join dir, lookup
-	else _.some _module._paths, (p) ->
-		try id = require.resolve path.join p, lookup
-		catch e then false
-	unless id? then throw new Error "Cannot find module '#{lookup}'"
-	return id
-
-resolve.isCoreModule = (mod) -> coreModules.indexOf(mod) > -1
-
 transformers = []
 validFiles = config.patterns ? []
 
@@ -51,25 +34,18 @@ transform = (filename, source) ->
 		_.some t.patterns, (p) -> isMatch filename, p
 	return if trans? then trans.fn(source) else source
 
-createContext = (filepath, ctx) ->
-	source = fs.readFileSync filepath, encoding: "utf-8"
-	script = vm.createScript source, filepath
-
-	context = {
-		__require: require
-		__resolve: resolve
-		__transform: transform
+createContext = (filepath, sandbox) ->
+	_.extend sandbox, {
 		__createContext: createContext
-		console, process, Buffer, $conf
+		console, process, Buffer, $conf, root
 		setTimeout, clearTimeout, setInterval, clearInterval
 	}
-	
-	exec = (ctx) ->
-		ctx = _.extend ctx, context
-		ctx.global = ctx
-		script.runInNewContext ctx
-	
-	return if ctx? then exec(ctx) else exec
+
+	sandbox.global = sandbox
+	modctx = createNewModuleContext filepath, sandbox
+	modctx.runMain()
+
+	return modctx
 
 core = express()
 
@@ -85,7 +61,7 @@ core.use (req, res, next) ->
 
 	return next() unless _.some validFiles, (p) -> isMatch filepath, p
 
-	createContext __dirname + "/env.js", __main: filepath, $req: req, $res: res, $next: next
+	createContext filepath, $req: req, $res: res, $next: next
 
 core.use express.directory process.cwd()
 core.use express.static process.cwd()
