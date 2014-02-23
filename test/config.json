@@ -1,5 +1,6 @@
 {
 	"sandbox": {
+		// "patterns": [ "!**/home*" ],
 		"transformers": {
 			"coffee": true
 			// "template": false

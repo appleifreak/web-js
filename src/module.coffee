@@ -345,6 +345,11 @@ module.exports = (main, sandbox) ->
 		# Native extension for .node
 		@_extensions['.node'] = TModule._extensions['.node']
 
+		# load up transformers
+		_.each require("./transformers"), (t) ->
+			_.each t.extensions, (ext) ->
+				Module._extensions[ext] = t.fn
+
 		# bootstrap main module.
 		@runMain = ->
 			# Load the main module--the first argument.

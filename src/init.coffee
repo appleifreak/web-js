@@ -17,6 +17,8 @@ class global.HTTPError
 app.use express.logger "dev"
 app.use require "./rewrite"
 app.use require "./core"
+app.use express.directory process.cwd()
+app.use express.static process.cwd()
 
 # custom error handle
 app.use (err, req, res, next) ->

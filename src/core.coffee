@@ -1,69 +1,48 @@
 _ = require "underscore"
-express = require "express"
-fs = require "fs"
-{Minimatch} = require "minimatch"
-{isMatch} = require "./helpers"
+path = require "path"
+{isQueryMatch} = require "./helpers"
 createNewModuleContext = require "./module"
 
-config = $conf.get "sandbox"
-transformers = []
-validFiles = config.patterns ? []
-
-_.each config.transformers, (options, name) ->
-	unless _.isObject(options) then options = {}
-	trans = { name, patterns: [] }
-
-	api =
-		registerPattern: (matches...) ->
-			_.each _.flatten(matches), (m) ->
-				if _.isString(m) then m = new Minimatch m
-				trans.patterns.push m
-				validFiles.push m
-			return
-		registerExtension: (exts...) ->
-			_.each _.flatten(exts), (ext) ->
-				ext = "." + ext if ext[0] isnt "."
-				api.registerPattern "**/*" + ext
-			return
-
-	trans.fn = require("./transformers/#{name}")(api, options)
-	transformers.push trans
-
-transform = (filename, source) ->
-	trans = _.find transformers, (t) ->
-		_.some t.patterns, (p) -> isMatch filename, p
-	return if trans? then trans.fn(source) else source
-
-createContext = (filepath, sandbox) ->
+createContext = (filename, sandbox) ->
 	_.extend sandbox, {
 		__createContext: createContext
-		console, process, Buffer, $conf, root
+		$config: $conf.get()
+		console, process, Buffer, root
 		setTimeout, clearTimeout, setInterval, clearInterval
 	}
 
 	sandbox.global = sandbox
-	modctx = createNewModuleContext filepath, sandbox
+	modctx = createNewModuleContext filename, sandbox
 	modctx.runMain()
 
 	return modctx
 
-core = express()
+module.exports = (req, res, next) ->
+	return next() unless req.filename?
+	relative = path.relative process.cwd(), req.filename
 
-core.use (req, res, next) ->
-	filepath = process.cwd() + req.path
-	return next() unless fs.existsSync(filepath)
+	# make sure we are allowed to be here
+	patterns = $conf.get("sandbox.patterns") ? []
+	patterns.push $or:
+		_.chain(require "./transformers")
+		.pluck("extensions").flatten().unique()
+		.map (e) -> "**/*" + e
+		.value()
+		.concat "**/*.js"
+	return next() unless isQueryMatch relative, patterns
 	
-	if fs.statSync(filepath).isDirectory()
-		dirfiles = fs.readdirSync filepath
-		index = _.find dirfiles, (f) -> _.some config.index, (p) -> isMatch f, p
-		return next() unless index?
-		filepath += index
+	# some easy to use globals functions
+	echo = (args...) ->
+		args.forEach (v) -> res.write v
+		return
+	header = _.bind res.set, res
+	statusCode = _.bind res.status, res
+	contentType = _.bind res.type, res
+	end = _.bind res.end, res
 
-	return next() unless _.some validFiles, (p) -> isMatch filepath, p
-
-	createContext filepath, $req: req, $res: res, $next: next
-
-core.use express.directory process.cwd()
-core.use express.static process.cwd()
-
-module.exports = core
+	createContext req.filename, {
+		$request: req
+		$response: res
+		$next: next
+		echo, header, statusCode, contentType, end
+	}

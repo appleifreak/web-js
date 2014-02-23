@@ -1,1 +1,2 @@
-$res.send "fuck you!"
+echo "fuck you!"
+end()

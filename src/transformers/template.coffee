@@ -1,4 +1,5 @@
 _ = require "underscore"
+fs = require 'fs'
 
 noMatch = /(.)^/
 escapes =
@@ -28,7 +29,7 @@ esc = """(function() {
 })()
 """
 
-module.exports = (api, settings) ->
+module.exports = (settings) ->
 	_.defaults settings, variable: "$", _.templateSettings
 	
 	matcher = new RegExp([
@@ -37,9 +38,11 @@ module.exports = (api, settings) ->
 		(settings.evaluate || noMatch).source
 	].join('|') + '|$', 'g')
 
-	api.registerExtension settings.extensions ? "html"
+	# default extensions
+	settings.extensions ?= [ ".html" ]
 
-	return (text) ->
+	return (_module, filename) ->
+		text = fs.readFileSync filename, 'utf-8'
 		index = 0
 		source = "__p+='"
 		aloEsc = false
@@ -65,6 +68,7 @@ module.exports = (api, settings) ->
 		if aloEsc then header += "__e=#{esc},"
 		header += "print=function(){__p+=__j.call(arguments,'');};\n"
 
-		footer = "return __p;})();\nif (require.main === module) { $res.send(200, module.exports); }\n"
+		footer = "return __p;})();\nif (require.main === module) { echo(module.exports); end(); }\n"
 
-		return header + source + footer
+		_module._compile header + source + footer, filename
+		return

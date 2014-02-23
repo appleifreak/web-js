@@ -12,7 +12,7 @@ conf = convict
 	threads:
 		doc: "The number of threads to launch on."
 		format: "int"
-		default: require('os').cpus().length - 1
+		default: require('os').cpus().length
 		arg: "threads"
 		env: "NODE_THREADS"
 	config:
@@ -30,19 +30,19 @@ conf = convict
 			arg: "port"
 			env: "PORT"
 		ignore:
-			doc: "Filename patterns that will always return 404."
+			doc: "Glob patterns for filenames that will always return 404."
 			format: Array
 			default: [ "node_modules", ".*", "package.json" ]
+		index:
+			doc: "Glob patterns for a filename to look for when the requested path is a directory."
+			format: Array
+			default: [ "index.js", "index.*" ]
 
 	sandbox:
 		patterns:
-			doc: "Whitelisted glob patterns to run on."
+			doc: "Glob query to determine if sandbox should run at a requested path."
 			format: Array
-			default: [ "**/*.js" ]
-		index:
-			doc: "Glob patterns to look for when the requested path is a directory."
-			format: Array
-			default: [ "index.js", "index.*" ]
+			default: []
 		transformers:
 			doc: "Modules that transform source code before it is executed."
 			format: Object
