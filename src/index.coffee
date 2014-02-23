@@ -4,9 +4,6 @@ cluster = require 'cluster'
 $conf =
 global.$conf = require "./config"
 
-# if cluster.isMaster then require "./master"
-# else require "./child"
-
 # fire up the cores
 if cluster.isMaster
 	threads = $conf.get("threads")
