@@ -14,12 +14,15 @@ module.exports = (req, res, next) ->
 	# get the true filename by cwd
 	req.filename = path.join process.cwd(), req.path
 	return next() unless fs.existsSync req.filename
+	req.stat = fs.statSync(req.filename)
 
 	# adjust filename for directories
-	if fs.statSync(req.filename).isDirectory()
+	if req.stat.isDirectory()
 		dirfiles = fs.readdirSync req.filename
 		index = _.find dirfiles, (f) -> _.some $conf.get("http.index"), (p) -> isMatch f, p
-		return next() unless index?
-		req.filename = path.join req.filename, index
+
+		if index?
+			req.filename = path.join req.filename, index
+			req.stat = fs.statSync(req.filename)
 
 	next()

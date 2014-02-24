@@ -1,9 +1,13 @@
 {
+	"http": {
+		"ignore": [ "markdown.js" ]
+	},
 	"sandbox": {
-		// "patterns": [ "!**/home*" ],
+		// "enabled": true,
+		// "patterns": [],
 		"transformers": {
-			"coffee": true
-			// "template": false
+			// "coffee": true
+			"./markdown.js": true
 		}
 	}
 }

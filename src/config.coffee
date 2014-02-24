@@ -1,5 +1,6 @@
 convict = require 'convict'
 path = require 'path'
+fs = require 'fs'
 
 module.exports =
 conf = convict
@@ -38,7 +39,29 @@ conf = convict
 			format: Array
 			default: [ "index.js", "index.*" ]
 
+	static:
+		enabled:
+			doc: "Enabled or disabled the static file server."
+			format: Boolean
+			default: true
+		patterns:
+			doc: "Glob query to determine which files should be served statically."
+			format: Array
+			default: []
+		mimetypes:
+			doc: "Mime types mapped to extensions."
+			format: Object
+			default: {}
+		directory:
+			doc: "If the request path is a directory, an html list of files will be shown."
+			format: Boolean
+			default: true
+
 	sandbox:
+		enabled:
+			doc: "Enabled or disabled the JavaScript sandbox."
+			format: Boolean
+			default: true
 		patterns:
 			doc: "Glob query to determine if sandbox should run at a requested path."
 			format: Array
@@ -48,5 +71,9 @@ conf = convict
 			format: Object
 			default: template: true
 
-conf.loadFile path.resolve process.cwd(), conf.get("config")
+configFile = path.resolve process.cwd(), conf.get("config")
+if fs.existsSync(configFile)
+	conf.loadFile configFile
+	conf.set "http.ignore", conf.get("http.ignore").concat conf.get "config"
+
 conf.validate()

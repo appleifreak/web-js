@@ -17,18 +17,19 @@ createContext = (filename, sandbox) ->
 
 	return modctx
 
+patterns = $conf.get("sandbox.patterns") ? []
+patterns.push $or:
+	_.chain(require "./transformers")
+	.pluck("extensions").flatten().unique()
+	.map (e) -> "**/*" + e
+	.value()
+	.concat "**/*.js"
+
 module.exports = (req, res, next) ->
 	return next() unless req.filename?
 	relative = path.relative process.cwd(), req.filename
 
 	# make sure we are allowed to be here
-	patterns = $conf.get("sandbox.patterns") ? []
-	patterns.push $or:
-		_.chain(require "./transformers")
-		.pluck("extensions").flatten().unique()
-		.map (e) -> "**/*" + e
-		.value()
-		.concat "**/*.js"
 	return next() unless isQueryMatch relative, patterns
 	
 	# some easy to use globals functions

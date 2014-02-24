@@ -16,9 +16,8 @@ class global.HTTPError
 # default middleware
 app.use express.logger "dev"
 app.use require "./rewrite"
-app.use require "./core"
-app.use express.directory process.cwd()
-app.use express.static process.cwd()
+if $conf.get "sandbox.enabled" then app.use require "./sandbox"
+if $conf.get "static.enabled" then app.use require "./static"
 
 # custom error handle
 app.use (err, req, res, next) ->

@@ -1,2 +1,0 @@
-echo "fuck you!"
-end()
