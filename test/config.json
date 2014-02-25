@@ -1,13 +1,22 @@
 {
 	"http": {
-		"ignore": [ "markdown.js" ]
+		// "ignore": [ "markdown.js" ]
+		// "url_base": "/"
+		"allow": [
+			"!layout.html"
+		]
 	},
 	"sandbox": {
 		// "enabled": true,
 		// "patterns": [],
 		"transformers": {
 			// "coffee": true
-			"./markdown.js": true
+			"markdown": {
+				//"template": "layout.html",
+				"template_data": {
+					"style": "/foghorn.css"
+				}
+			}
 		}
 	}
 }

@@ -31,44 +31,60 @@ esc = """(function() {
 
 module.exports = (settings) ->
 	_.defaults settings, variable: "$", _.templateSettings
-	
+
+	# default extensions
+	settings.extensions ?= [ ".html" ]
+
+	# bind settings
+	module.exports.render = 
+	_render = (text, options = {}) ->
+		return render text, _.extend options, settings
+
+	return (_module, filename) ->
+		text = fs.readFileSync filename, 'utf-8'
+		source = """module.exports=#{_render text};
+			if (require.main === module) {
+				contentType(\"html\");
+				echo(module.exports());
+				end();
+			}\n"""
+
+		_module._compile source, filename
+		return
+
+render =
+module.exports.render = (text, settings = {}) ->
+	index = 0
+	source = "__p+='"
+	aloEsc = false
+
 	matcher = new RegExp([
 		(settings.escape || noMatch).source,
 		(settings.interpolate || noMatch).source,
 		(settings.evaluate || noMatch).source
 	].join('|') + '|$', 'g')
+	
+	text.replace matcher, (match, escape, interpolate, evaluate, offset) ->
+		source += text.slice(index, offset)
+			.replace escaper, (match) -> '\\' + escapes[match]
 
-	# default extensions
-	settings.extensions ?= [ ".html" ]
+		if escape
+			aloEsc = true
+			source += "'+\n((__t=(#{escape}))==null?'':__e(__t))+\n'"
+		if interpolate then source += "'+\n((__t=(#{interpolate}))==null?'':__t)+\n'"
+		if evaluate then source += "';\n#{evaluate}\n__p+='"
 
-	return (_module, filename) ->
-		text = fs.readFileSync filename, 'utf-8'
-		index = 0
-		source = "__p+='"
-		aloEsc = false
-		
-		text.replace matcher, (match, escape, interpolate, evaluate, offset) ->
-			source += text.slice(index, offset)
-				.replace escaper, (match) -> '\\' + escapes[match]
+		index = offset + match.length
+		return match
 
-			if escape
-				aloEsc = true
-				source += "'+\n((__t=(#{escape}))==null?'':__e(__t))+\n'"
-			if interpolate then source += "'+\n((__t=(#{interpolate}))==null?'':__t)+\n'"
-			if evaluate then source += "';\n#{evaluate}\n__p+='"
+	source += "';\n";
 
-			index = offset + match.length
-			return match
+	unless settings.variable then source = "with(obj||{}){\n#{source}}\n"
 
-		source += "';\n";
+	header = "function(#{settings.variable or ""}){var __t,__p='',__j=Array.prototype.join,"
+	if aloEsc then header += "__e=#{esc},"
+	header += "print=function(){__p+=__j.call(arguments,'');};\n"
 
-		unless settings.variable then source = "with(obj||{}){\n#{source}}\n"
+	footer = "return __p;}"
 
-		header = "module.exports=(function(#{settings.variable or ""}){var __t,__p='',__j=Array.prototype.join,"
-		if aloEsc then header += "__e=#{esc},"
-		header += "print=function(){__p+=__j.call(arguments,'');};\n"
-
-		footer = "return __p;})();\nif (require.main === module) { echo(module.exports); end(); }\n"
-
-		_module._compile header + source + footer, filename
-		return
+	return header + source + footer

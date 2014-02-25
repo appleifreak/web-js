@@ -1,15 +1,21 @@
 _ = require "underscore"
 fs = require "fs"
 path = require "path"
-{isMatch} = require "./helpers"
+{isMatch, isQueryMatch} = require "./helpers"
 
 module.exports = (req, res, next) ->
+	res.set "X-Powered-By", "WebJS (Express)"
+
 	# ignore certain paths
 	parts = req.path.split "/"
 	ignored = _.some parts, (part, i) ->
 		part = part + "/" if i+1 isnt parts.length
 		_.some $conf.get("http.ignore"), (p) -> isMatch part, p
-	if ignored then return next new HTTPError 404, "Not Found."
+	if ignored then return next()
+
+	# return 403 on denied routes
+	relPath = path.relative "/", req.path
+	return next new HTTPError 403 unless isQueryMatch relPath, $conf.get("http.allow")
 
 	# get the true filename by cwd
 	req.filename = path.join process.cwd(), req.path
@@ -25,4 +31,5 @@ module.exports = (req, res, next) ->
 			req.filename = path.join req.filename, index
 			req.stat = fs.statSync(req.filename)
 
+	req.relative = path.relative process.cwd(), req.filename
 	next()
