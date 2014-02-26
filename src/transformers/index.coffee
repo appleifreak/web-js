@@ -2,7 +2,7 @@ _ = require "underscore"
 path = require "path"
 
 module.exports =
-transformers = []
+transformers = {}
 config = $conf.get "sandbox.transformers"
 
 _.each config, (options, name) ->
@@ -18,5 +18,5 @@ _.each config, (options, name) ->
 	trans = { name, filename, options }
 	trans.fn = require(filename).call(trans, options)
 	trans.extensions = options.extensions ? []
-	
-	transformers.push trans
+
+	transformers[name] = trans

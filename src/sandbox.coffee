@@ -19,7 +19,7 @@ createContext = (filename, sandbox) ->
 
 allow = $conf.get("sandbox.allow") ? []
 allow.push $or:
-	_.chain(require "./transformers")
+	_.chain(require "./transformers").values()
 	.pluck("extensions").flatten().unique()
 	.map (e) -> "**/*" + e
 	.value()

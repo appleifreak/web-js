@@ -39,7 +39,7 @@ conf = convict
 			format: Array
 			default: [ "index.js", "index.*" ]
 		url_base:
-			doc: "Dynamically constructed urls with be prepended with this value."
+			doc: "Dynamically constructed urls will be prepended with this value."
 			format: String
 			default: ""
 		allow:

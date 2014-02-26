@@ -18,6 +18,11 @@ isCoreModule = (mod) -> coreModules.indexOf(mod) > -1
 hasOwnProperty = (obj, prop) ->
 	return Object.prototype.hasOwnProperty.call obj, prop
 
+# instead of web-js we return this object
+webjs = {}
+good_things = transformers: "./transformers", helpers: "./helpers"
+_.each good_things, (n, k) -> webjs[k] = require n
+
 # wrapped to ensure a fresh copy
 # every time it's required
 module.exports = (main, sandbox) ->
@@ -212,8 +217,11 @@ module.exports = (main, sandbox) ->
 			if isCoreModule(filename)
 				# module is a special, because we want this one, not the real one
 				if filename is 'module' then return Module
-				
+
 				return require filename
+
+			# requiring web-js is bad so instead we return good things
+			if filename is _pkg.name then return webjs
 
 			module = new Module filename, parent
 
@@ -235,7 +243,7 @@ module.exports = (main, sandbox) ->
 			return module.exports
 
 		@_resolveFilename = (request, parent) ->
-			if isCoreModule request
+			if isCoreModule(request) or request is _pkg.name
 				return request
 
 			resolvedModule = Module._resolveLookupPaths request, parent
