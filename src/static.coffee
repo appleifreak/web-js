@@ -24,4 +24,5 @@ module.exports = (req, res, next) ->
 
 	# serve
 	res.type type
+	res.set "Content-Length", req.stat.size
 	fs.createReadStream(req.filename).pipe res

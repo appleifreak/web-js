@@ -3,7 +3,7 @@
 		// "ignore": [ "markdown.js" ]
 		// "url_base": "/"
 		"allow": [
-			"!layout.html"
+			"!/layout.html"
 		]
 	},
 	"sandbox": {

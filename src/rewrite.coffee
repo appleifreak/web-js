@@ -2,8 +2,13 @@ _ = require "underscore"
 fs = require "fs"
 path = require "path"
 {isMatch, isQueryMatch} = require "./helpers"
+crypto = require "crypto"
+fresh = require "fresh"
+
+md5 = (v) -> crypto.createHash("md5").update(v).digest("hex")
 
 module.exports = (req, res, next) ->
+	# represent!
 	res.set "X-Powered-By", "WebJS (Express)"
 
 	# ignore certain paths
@@ -14,8 +19,8 @@ module.exports = (req, res, next) ->
 	if ignored then return next()
 
 	# return 403 on denied routes
-	relPath = path.relative "/", req.path
-	return next new HTTPError 403 unless isQueryMatch relPath, $conf.get("http.allow")
+	# relPath = path.relative "/", req.path
+	return next new HTTPError 403 unless isQueryMatch req.path, $conf.get("http.allow")
 
 	# get the true filename by cwd
 	req.filename = path.join process.cwd(), req.path
@@ -31,5 +36,17 @@ module.exports = (req, res, next) ->
 			req.filename = path.join req.filename, index
 			req.stat = fs.statSync(req.filename)
 
+	# relative file name
 	req.relative = path.relative process.cwd(), req.filename
+	
+	# basic etag support
+	id = md5 req.method + req.url + req.stat.mtime + req.stat.size
+	res.set 'ETag', id
+	
+	if fresh req.headers, res._headers
+		res.writeHead(304)
+		res.end()
+		return
+
+	# continue
 	next()

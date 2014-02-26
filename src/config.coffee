@@ -49,7 +49,7 @@ conf = convict
 
 	static:
 		enabled:
-			doc: "Enabled or disabled the static file server."
+			doc: "Enable or disable the static file server."
 			format: Boolean
 			default: true
 		allow:
@@ -67,7 +67,7 @@ conf = convict
 
 	sandbox:
 		enabled:
-			doc: "Enabled or disabled the JavaScript sandbox."
+			doc: "Enable or disable the JavaScript sandbox."
 			format: Boolean
 			default: true
 		allow:

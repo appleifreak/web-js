@@ -8,7 +8,8 @@
 		"express": "3.4.8",
 		"underscore": "1.6.0",
 		"minimatch": "0.2.14",
-		"convict": "0.4.2"
+		"convict": "0.4.2",
+		"fresh": "0.2.2"
 	},
 	"devDependencies": {
 		"coffee-script": "1.7.1"

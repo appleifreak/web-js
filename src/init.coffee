@@ -4,23 +4,15 @@ http = require "http"
 # new express app
 app = express()
 
-errorCodes = {
-
-}
-
 class global.HTTPError
 	constructor: (@code, @message) ->
-		@message ?= HTTPError._humanReadable[code] ? "Server Error"
+		@message ?= http.STATUS_CODES[code] ? "Server Error"
 		stack = (new Error).stack.split("\n").slice(2)
 		stack.unshift @toString()
 		@stack = stack.join("\n")
 	@:: = new Error
 	toString: -> "#{@name}: [#{@code}] #{@message}"
 	name: "HTTPError"
-	@_humanReadable:
-		403: "Forbidden"
-		404: "Not Found"
-		500: "Internal Server Error"
 
 # default middleware
 app.use express.logger "dev"

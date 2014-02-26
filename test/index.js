@@ -1,0 +1,2 @@
+echo("fuck you");
+end();

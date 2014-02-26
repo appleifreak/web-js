@@ -303,10 +303,10 @@ module.exports = (main, sandbox) ->
 			# if Module._contextLoad
 			# This is where we would stick code to have the module
 			# load in its own context. I haven't implemented this
-			# yet to the fear factor.
+			# yet due to the inherent fear factor.
 
 			# create wrapper function
-			# Notice how we execute in a new context and not this
+			# Notice how we execute in the global context and not this
 			# one. This context will always run in the true global.
 			wrapper = Module.wrap content
 			compiledWrapper = vm.runInContext wrapper, _global, filename
