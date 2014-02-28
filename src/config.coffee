@@ -51,6 +51,10 @@ conf = convict
 			doc: "Glob query to matching valid request paths. Invalid requests are sent 403 Forbidden."
 			format: Array
 			default: []
+		compress:
+			doc: "Enable gzip compression."
+			format: Boolean
+			default: false
 
 	static:
 		enabled:
@@ -74,6 +78,10 @@ conf = convict
 			format: Object
 			default:
 				"Cache-Control": "max-age=86400"
+		cache:
+			doc: "If enabled, sends etag and last modified headers to save on duplicate requests."
+			format: Boolean
+			default: true
 
 	sandbox:
 		enabled:
@@ -88,6 +96,10 @@ conf = convict
 			doc: "Modules that transform source code before it is executed."
 			format: Object
 			default: template: true
+		cache:
+			doc: "If enabled, sends etag and last modified headers to save on duplicate requests."
+			format: Boolean
+			default: true
 
 # resolve the cwd
 cwd = path.resolve conf.get("cwd")

@@ -1,6 +1,8 @@
 _ = require "underscore"
 {Minimatch} = require "minimatch"
 path = require "path"
+fresh = require "fresh"
+crypto = require "crypto"
 
 isMatch =
 exports.isMatch = (filename, pattern) ->
@@ -40,6 +42,7 @@ exports.generate = (req, res, next) ->
 	echo: (args...) ->
 		vals = args.map (v) ->
 			if _.isString(v) or _.isNumber(v) then return v
+			else if Buffer.isBuffer(v) then return v.toString("utf-8")
 			else return JSON.stringify(v)
 
 		res.write vals.join(" ") + "\n", "utf-8"
@@ -61,3 +64,17 @@ exports.basicWrapper = (src, type = "html") ->
 		write(content);
 		end();
 	}"""
+
+md5 =
+exports.md5 = (v) -> crypto.createHash("md5").update(v).digest("hex")
+
+exports.cacheControl = (req, res) ->
+	res.set 'ETag', md5 req.method + req.url + req.stat.mtime + req.stat.size
+	res.set "Last-Modified", req.stat.mtime.toUTCString()
+	
+	if fresh req.headers, res._headers
+		res.writeHead(304)
+		res.end()
+		return true
+
+	return false

@@ -1,6 +1,6 @@
 _ = require "underscore"
 path = require "path"
-{isQueryMatch, generate} = require "./helpers"
+{isQueryMatch, generate, cacheControl} = require "./helpers"
 createNewModuleContext = require "./module"
 
 createContext = (filename, sandbox) ->
@@ -30,6 +30,9 @@ module.exports = (req, res, next) ->
 
 	# make sure we are allowed to be here
 	return next() unless isQueryMatch req.relative, allow
+
+	# cache control
+	return if $conf.get("sandbox.cache") and cacheControl req, res
 
 	# make the context
 	sandbox = generate(req, res, next)

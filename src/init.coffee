@@ -19,6 +19,7 @@ class global.HTTPError
 
 # default middleware
 app.use express.logger "dev"
+if $conf.get "http.compress" then app.use express.compress()
 app.use require "./rewrite"
 if $conf.get "sandbox.enabled" then app.use require "./sandbox"
 if $conf.get "static.enabled" then app.use require "./static"

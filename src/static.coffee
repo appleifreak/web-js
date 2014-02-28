@@ -2,7 +2,7 @@ _ = require "underscore"
 fs = require 'fs'
 path = require 'path'
 express = require "express"
-{isQueryMatch} = require "./helpers"
+{isQueryMatch, cacheControl} = require "./helpers"
 
 directory = express.directory $conf.get("cwd")
 
@@ -12,6 +12,9 @@ module.exports = (req, res, next) ->
 	# make sure we are allowed to be here
 	allow = $conf.get("static.allow") ? []
 	return next() unless isQueryMatch req.relative, allow
+
+	# cache control
+	return if $conf.get("static.cache") and cacheControl req, res
 
 	# serve directories as html documents
 	if req.stat.isDirectory() and $conf.get("static.directory")
@@ -27,7 +30,6 @@ module.exports = (req, res, next) ->
 		res.set k, v if _.isEmpty(res.get(k))
 	res.type type
 	res.set "Content-Length", req.stat.size
-	res.set "Last-Modified", req.stat.mtime.toUTCString()
 
 	# serve
 	fs.createReadStream(req.filename).pipe res

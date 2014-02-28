@@ -2,10 +2,6 @@ _ = require "underscore"
 fs = require "fs"
 path = require "path"
 {isMatch, isQueryMatch} = require "./helpers"
-crypto = require "crypto"
-fresh = require "fresh"
-
-md5 = (v) -> crypto.createHash("md5").update(v).digest("hex")
 
 module.exports = (req, res, next) ->
 	# represent!
@@ -39,14 +35,5 @@ module.exports = (req, res, next) ->
 	# relative file name
 	req.relative = path.relative $conf.get("cwd"), req.filename
 	
-	# basic etag support
-	id = md5 req.method + req.url + req.stat.mtime + req.stat.size
-	res.set 'ETag', id
-	
-	if fresh req.headers, res._headers
-		res.writeHead(304)
-		res.end()
-		return
-
 	# continue
 	next()
