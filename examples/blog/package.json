@@ -4,6 +4,7 @@
 		"web-js": "*",
 		"glob": "3.2.9",
 		"underscore": "1.6.0",
-		"bluebird": "1.0.7"
+		"bluebird": "1.0.7",
+		"less": "1.7.0"
 	}
 }

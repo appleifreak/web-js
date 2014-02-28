@@ -4,27 +4,11 @@ var dateFormat = require("../lib/date-format");
 print(require("./header")($));
 %>
 
-<style type="text/css">
-a.back-btn {
-	position: absolute;
-	left: -35px;
-	line-height: 2.4em;
-	color: #bbb;
-}
-
-a.back-btn:hover {
-	color: #666;
-	text-decoration: none;
-}
-</style>
-
 <article>
 	<a class="back-btn" href="<%= url("/") %>">&crarr;</a>
 	<h1><%= $.title %></h1>
 	<h3><%= dateFormat($.date) %></h3>
 	<%= $.body %>
 </article>
-
-<hr />
 
 <%= require("./footer")($) %>

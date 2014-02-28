@@ -5,7 +5,7 @@ var _ = require("underscore"),
 print(require("./header")($));
 %>
 
-<% _.each($.articles, function(a) { %>
+<% _.each($.articles, function(a, i, l) { %>
 <article>
 	<h2>
 		<a href="<%= a.url %>"><%= a.title %></a>
@@ -13,7 +13,7 @@ print(require("./header")($));
 	<h3><%= dateFormat(a.date) %></h3>
 	<%= a.body %>
 </article>
-<hr/>
+<% if (i + 1 !== l.length) { %><hr/><% } %>
 <% }); %>
 
 <%= require("./footer")($) %>
