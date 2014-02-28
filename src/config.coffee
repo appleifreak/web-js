@@ -90,15 +90,17 @@ conf = convict
 			default: template: true
 
 # resolve the cwd
-conf.set "cwd", path.resolve conf.get("cwd")
+cwd = path.resolve conf.get("cwd")
 
 # load the config file
-configFile = path.resolve conf.get("cwd"), conf.get("config")
+configFile = path.resolve cwd, conf.get("config")
 if fs.existsSync(configFile)
 	conf.load require configFile
 	allow = conf.get("http.allow")
-	allow.push "!" + path.relative conf.get("cwd"), configFile
+	allow.push "!" + path.relative cwd, configFile
 	conf.set "http.allow", allow
+
+conf.set "cwd", cwd
 
 # validate and go
 conf.validate()

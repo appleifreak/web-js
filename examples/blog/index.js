@@ -8,11 +8,12 @@ var _ = require("underscore"),
 var markdown = web.transformers.markdown,
 	parse = markdown.fn.parse;
 
-var templateData = $config.site || {};
+var templateData = $config.site || {},
+	cwd = $config.cwd;
 
-glob("articles/*{/index,}.+(md|markdown)")
+glob("articles/*{/index,}.+(md|markdown)", { cwd: cwd })
 	.map(function(file) {
-		return readFile(file, "utf-8")
+		return readFile(cwd + "/" + file, "utf-8")
 			.then(parse)
 			.then(function(data) {
 				data.date = new Date(data.date);

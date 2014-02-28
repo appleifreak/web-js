@@ -30,7 +30,7 @@ module.exports = (req, res, next) ->
 
 	# make sure we are allowed to be here
 	return next() unless isQueryMatch req.relative, allow
-	
+
 	# make the context
 	sandbox = generate(req, res, next)
 	createContext req.filename, sandbox
