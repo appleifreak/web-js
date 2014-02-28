@@ -23,7 +23,7 @@ module.exports = (req, res, next) ->
 	return next new HTTPError 403 unless isQueryMatch req.path, $conf.get("http.allow")
 
 	# get the true filename by cwd
-	req.filename = path.join process.cwd(), req.path
+	req.filename = path.join $conf.get("cwd"), req.path
 	return next() unless fs.existsSync req.filename
 	req.stat = fs.statSync(req.filename)
 
@@ -37,7 +37,7 @@ module.exports = (req, res, next) ->
 			req.stat = fs.statSync(req.filename)
 
 	# relative file name
-	req.relative = path.relative process.cwd(), req.filename
+	req.relative = path.relative $conf.get("cwd"), req.filename
 	
 	# basic etag support
 	id = md5 req.method + req.url + req.stat.mtime + req.stat.size

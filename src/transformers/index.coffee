@@ -10,7 +10,7 @@ _.each config, (options, name) ->
 	unless _.isObject(options) then options = {}
 
 	if /^\.{0,2}\//.test(name)
-		filename = path.resolve process.cwd(), name
+		filename = path.resolve $conf.get("cwd"), name
 	else
 		try filename = require.resolve "./#{name}"
 		catch e then filename = require.resolve name

@@ -4,7 +4,7 @@ path = require 'path'
 express = require "express"
 {isQueryMatch} = require "./helpers"
 
-directory = express.directory process.cwd()
+directory = express.directory $conf.get("cwd")
 
 module.exports = (req, res, next) ->
 	return next() unless req.relative?

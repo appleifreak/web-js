@@ -22,6 +22,11 @@ conf = convict
 		default: "config.json"
 		arg: "config"
 		env: "NODE_CONFIG"
+	cwd:
+		doc: "The current working directory."
+		format: String
+		default: process.cwd()
+		arg: "cwd"
 
 	http:
 		port:
@@ -84,9 +89,16 @@ conf = convict
 			format: Object
 			default: template: true
 
-configFile = path.resolve process.cwd(), conf.get("config")
-if fs.existsSync(configFile)
-	conf.loadFile configFile
-	conf.set "http.ignore", conf.get("http.ignore").concat conf.get "config"
+# resolve the cwd
+conf.set "cwd", path.resolve conf.get("cwd")
 
+# load the config file
+configFile = path.resolve conf.get("cwd"), conf.get("config")
+if fs.existsSync(configFile)
+	conf.load require configFile
+	allow = conf.get("http.allow")
+	allow.push "!" + path.relative conf.get("cwd"), configFile
+	conf.set "http.allow", allow
+
+# validate and go
 conf.validate()
