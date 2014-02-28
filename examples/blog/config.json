@@ -5,8 +5,8 @@
 	},
 	"http": {
 		"allow": [
-			"!/templates{/**,}",
-			"!/lib{/**,}"
+			"!templates{/**,}",
+			"!lib{/**,}"
 		]
 	},
 	"sandbox": {

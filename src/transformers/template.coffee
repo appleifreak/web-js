@@ -1,5 +1,6 @@
 _ = require "underscore"
 fs = require 'fs'
+{basicWrapper} = require "../helpers"
 
 noMatch = /(.)^/
 escapes =
@@ -37,12 +38,7 @@ module.exports = (settings) ->
 
 	t = (_module, filename) ->
 		text = fs.readFileSync filename, 'utf-8'
-		source = """module.exports=#{t.render text};
-			if (require.main === module) {
-				contentType(\"html\");
-				echo(module.exports.call(this, {}));
-				end();
-			}\n"""
+		source = basicWrapper t.render(text), "html"
 
 		_module._compile source, filename
 		return

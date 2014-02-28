@@ -46,8 +46,18 @@ exports.generate = (req, res, next) ->
 		return
 
 	# dynamic urls
-	url: do ->
+	$resolvePath: do ->
 		dirpath = path.dirname path.join "/", req.relative
 		base = $conf.get("http.url_base") ? ""
 		if base.substr(-1) is "/" then base = base.substr 0, base.length - 1
 		(p) -> base + path.resolve dirpath, stripIndex p
+
+exports.basicWrapper = (src, type = "html") ->
+	return """module.exports=#{src};
+	if (require.main === module) {
+		var content = typeof module.exports === "function" ? module.exports.call(this) : module.exports;
+		contentType(#{JSON.stringify type});
+		$response.set("Content-Length", content.length);
+		write(content);
+		end();
+	}"""

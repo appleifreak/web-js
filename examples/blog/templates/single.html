@@ -5,7 +5,7 @@ print(require("./header")($));
 %>
 
 <article>
-	<a class="back-btn" href="<%= url("/") %>">&crarr;</a>
+	<a class="back-btn" href="<%= $resolvePath("/") %>">&crarr;</a>
 	<h1><%= $.title %></h1>
 	<h3><%= dateFormat($.date) %></h3>
 	<%= $.body %>

@@ -2,14 +2,7 @@ _ = require "underscore"
 marked = require "marked"
 fs = require "fs"
 path = require "path"
-
-wrapper = (src) ->
-	return """module.exports=#{src};
-	if (require.main === module) {
-		contentType("html");
-		echo(module.exports.call(this));
-		end();
-	}"""
+{basicWrapper} = require "../helpers"
 
 html = _.template """<!DOCTYPE html>
 <html lang="en-US">
@@ -21,7 +14,7 @@ html = _.template """<!DOCTYPE html>
 		<% if ($.style == null) $.style = [];
 		if (!Array.isArray($.style)) $.style = [ $.style ];
 		$.style.forEach(function(s) { %>
-		<link rel="stylesheet" href="<%= url(s) %>" type="text/css" />
+		<link rel="stylesheet" href="<%= $resolvePath(s) %>" type="text/css" />
 		<% }); %>
 	</head>
 	<body>
@@ -43,7 +36,7 @@ module.exports = (options) ->
 
 	t = (_module, filename) ->
 		text = fs.readFileSync(filename, "utf-8")
-		source = wrapper t.render t.parse text
+		source = basicWrapper t.render(t.parse text), "html"
 
 		_module._compile source, filename
 

@@ -2,6 +2,7 @@ _ = require "underscore"
 fs = require "fs"
 path = require "path"
 less = require "less"
+{basicWrapper} = require "../helpers"
 
 module.exports = (options) ->
 	_.defaults options, extensions: [ ".less" ]
@@ -11,11 +12,7 @@ module.exports = (options) ->
 		text = fs.readFileSync filename, 'utf-8'
 		source = t.render text, { filename: path.basename filename }
 
-		_module._compile """
-		contentType("css");
-		write(#{JSON.stringify(source)});
-		end();
-		""", filename
+		_module._compile basicWrapper(JSON.stringify(source), "css"), filename
 		return
 
 	t.render = (text, opts = {}) ->

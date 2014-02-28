@@ -20,7 +20,7 @@ module.exports = (req, res, next) ->
 
 	# return 403 on denied routes
 	# relPath = path.relative "/", req.path
-	return next new HTTPError 403 unless isQueryMatch req.path, $conf.get("http.allow")
+	return next new HTTPError 403 unless isQueryMatch req.path.substr(1), $conf.get("http.allow")
 
 	# get the true filename by cwd
 	req.filename = path.join $conf.get("cwd"), req.path

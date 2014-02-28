@@ -18,7 +18,7 @@ glob("articles/*{/index,}.+(md|markdown)", { cwd: cwd })
 			.then(function(data) {
 				data.date = new Date(data.date);
 				data.file = file;
-				data.url = url(file);
+				data.url = $resolvePath(file);
 				return data;
 			});
 	})
@@ -27,8 +27,12 @@ glob("articles/*{/index,}.+(md|markdown)", { cwd: cwd })
 			return b.date - a.date;
 		});
 
-		var data = _.extend({ articles: articles }, templateData);
-		echo(html(data));
+		var data = _.extend({ articles: articles }, templateData),
+			content = html(data);
+
+		contentType("html");
+		$response.set("Content-Length", content.length);
+		write(content);
 		end();
 	})
 	.catch(function(err) {

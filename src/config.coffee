@@ -18,8 +18,8 @@ conf = convict
 		env: "NODE_THREADS"
 	config:
 		doc: "JSON configuration file path relative to the current working directory."
-		format: String
-		default: "config.json"
+		format: Array
+		default: [ "config.json", "config.js" ]
 		arg: "config"
 		env: "NODE_CONFIG"
 	cwd:
@@ -31,7 +31,7 @@ conf = convict
 	http:
 		port:
 			doc: "The port to start the HTTP server on."
-			format: "int"
+			format: "port"
 			default: 3000
 			arg: "port"
 			env: "PORT"
@@ -93,13 +93,19 @@ conf = convict
 cwd = path.resolve conf.get("cwd")
 
 # load the config file
-configFile = path.resolve cwd, conf.get("config")
-if fs.existsSync(configFile)
-	conf.load require configFile
+conf.get("config").some (filename) ->
+	configFile = path.resolve cwd, filename
+	return unless fs.existsSync(configFile)
+
+	if path.extname(configFile) is ".json" then conf.loadFile(configFile)
+	else conf.load require configFile
+	
 	allow = conf.get("http.allow")
 	allow.push "!" + path.relative cwd, configFile
 	conf.set "http.allow", allow
+	return true
 
+# make the cwd permanent
 conf.set "cwd", cwd
 
 # validate and go
