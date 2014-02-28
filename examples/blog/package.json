@@ -1,10 +1,9 @@
 {
-  "name": "test",
-  "dependencies": {
-    "web-js": "*",
-    "html-truncate": "1.0.3",
-    "glob": "3.2.9",
-    "underscore": "1.6.0",
-    "bluebird": "~1.0.7"
-  }
+	"name": "webjs-example-blog",
+	"dependencies": {
+		"web-js": "*",
+		"glob": "3.2.9",
+		"underscore": "1.6.0",
+		"bluebird": "1.0.7"
+	}
 }

@@ -64,6 +64,11 @@ conf = convict
 			doc: "If the request path is a directory, an html list of files will be shown."
 			format: Boolean
 			default: true
+		headers:
+			doc: "Additional headers to add onto static requests."
+			format: Object
+			default:
+				"Cache-Control": "max-age=86400"
 
 	sandbox:
 		enabled:

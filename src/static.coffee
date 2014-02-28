@@ -22,7 +22,12 @@ module.exports = (req, res, next) ->
 	type = _.find $conf.get("static.mime_types") ? [], (m, e) -> ext is m
 	type = ext unless type?
 
-	# serve
+	# set some headers
+	_.each $conf.get("static.headers"), (v, k) ->
+		res.set k, v if _.isEmpty(res.get(k))
 	res.type type
 	res.set "Content-Length", req.stat.size
+	res.set "Last-Modified", req.stat.mtime.toUTCString()
+
+	# serve
 	fs.createReadStream(req.filename).pipe res

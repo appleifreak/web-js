@@ -19,6 +19,7 @@ body {
 }
 
 header, nav, article, footer {
+	position: relative;
 	margin: 0 auto;
 }
 

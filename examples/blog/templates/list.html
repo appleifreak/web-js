@@ -1,8 +1,18 @@
-<% var _ = require("underscore"); %>
-<%= require("./header")($) %>
+<%
+var _ = require("underscore"),
+	dateFormat = require("../lib/date-format");
+
+print(require("./header")($));
+%>
 
 <% _.each($.articles, function(a) { %>
-<%= require("./article")(_.extend(a, { isList: true })) %>
+<article>
+	<h2>
+		<a href="<%= a.url %>"><%= a.title %></a>
+	</h2>
+	<h3><%= dateFormat(a.date) %></h3>
+	<%= a.body %>
+</article>
 <hr/>
 <% }); %>
 

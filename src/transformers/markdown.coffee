@@ -4,8 +4,12 @@ fs = require "fs"
 path = require "path"
 
 wrapper = (src) ->
-	return "module.exports=(#{src})();" +
-		"\nif (require.main === module) { contentType(\"html\"); echo(module.exports); end(); }"
+	return """module.exports=#{src};
+	if (require.main === module) {
+		contentType("html");
+		echo(module.exports.call(this));
+		end();
+	}"""
 
 html = _.template """<!DOCTYPE html>
 <html lang="en-US">
@@ -39,7 +43,7 @@ module.exports = (options) ->
 
 	t = (_module, filename) ->
 		text = fs.readFileSync(filename, "utf-8")
-		source = wrapper t.render text
+		source = wrapper t.render t.parse text
 
 		_module._compile source, filename
 
@@ -80,17 +84,33 @@ module.exports = (options) ->
 		return data
 		
 	render =
-	t.render = (text) ->
-		data = t.parse text, options
-
+	t.render = (data) ->
 		tpl = options.template
 		unless _.isEmpty(tpl) then tpl = path.resolve process.cwd(), tpl
 		else tpl = options.template_data.template
 		if _.isEmpty(tpl) then tpl = html.source
 		else tpl = """require("#{unless /^\.{0,2}\//.test(tpl) then "./" else ""}#{tpl}")"""
 
-		return """function(){
-			return (#{tpl}).call(this, #{JSON.stringify(data)});
-		}"""
+		return """(function(){
+			var hard = #{JSON.stringify(data)},
+				hop = Object.hasOwnProperty;
+
+			function extend(obj) {
+				if (typeof obj === "object") {
+					var args = [].slice.call(arguments, 1);
+					args.forEach(function(o) {
+						if (typeof o !== "object") return;
+						Object.keys(o).forEach(function(key) {
+							obj[key] = o[key];
+						});
+					});
+				}
+				return obj;
+			}
+
+			return function(data) {
+				return (#{tpl}).call(this, extend({}, hard, data));
+			}
+		})();"""
 
 	return t

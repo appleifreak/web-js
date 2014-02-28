@@ -8,10 +8,7 @@ var _ = require("underscore"),
 var markdown = web.transformers.markdown,
 	parse = markdown.fn.parse;
 
-var templateData = {
-	title: "My Blog",
-	style: "foghorn.css"
-}
+var templateData = $config.site || {};
 
 glob("articles/*{/index,}.+(md|markdown)")
 	.map(function(file) {
@@ -26,8 +23,9 @@ glob("articles/*{/index,}.+(md|markdown)")
 	})
 	.then(function(articles) {
 		articles.sort(function(a, b) {
-			return a.date - b.date;
-		}).reverse();
+			return b.date - a.date;
+		});
+
 		var data = _.extend({ articles: articles }, templateData);
 		echo(html(data));
 		end();

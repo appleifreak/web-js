@@ -40,7 +40,7 @@ module.exports = (settings) ->
 		source = """module.exports=#{t.render text};
 			if (require.main === module) {
 				contentType(\"html\");
-				echo(module.exports());
+				echo(module.exports.call(this, {}));
 				end();
 			}\n"""
 

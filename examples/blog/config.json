@@ -1,16 +1,16 @@
 {
+	"site": {
+		"title": "My Blog",
+		"style": "foghorn.css"
+	},
 	"http": {
-		// "ignore": [ "markdown.js" ]
-		// "url_base": "/"
 		"allow": [
-			"!/templates{/**,}"
+			"!/templates{/**,}",
+			"!/lib{/**,}"
 		]
 	},
 	"sandbox": {
-		// "enabled": true,
-		// "patterns": [],
 		"transformers": {
-			// "coffee": true
 			"markdown": {
 				"template": "templates/single.html",
 				"template_data": {
