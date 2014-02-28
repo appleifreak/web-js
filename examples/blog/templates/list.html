@@ -1,0 +1,9 @@
+<% var _ = require("underscore"); %>
+<%= require("./header")($) %>
+
+<% _.each($.articles, function(a) { %>
+<%= require("./article")(_.extend(a, { isList: true })) %>
+<hr/>
+<% }); %>
+
+<%= require("./footer")($) %>

@@ -3,7 +3,7 @@
 		// "ignore": [ "markdown.js" ]
 		// "url_base": "/"
 		"allow": [
-			"!/layout.html"
+			"!/templates{/**,}"
 		]
 	},
 	"sandbox": {
@@ -12,7 +12,7 @@
 		"transformers": {
 			// "coffee": true
 			"markdown": {
-				//"template": "layout.html",
+				"template": "templates/single.html",
 				"template_data": {
 					"style": "/foghorn.css"
 				}
