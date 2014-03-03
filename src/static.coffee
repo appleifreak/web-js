@@ -7,7 +7,7 @@ express = require "express"
 directory = express.directory $conf.get("cwd")
 
 module.exports = (req, res, next) ->
-	return next() unless req.relative?
+	return next() unless req.stat?
 
 	# make sure we are allowed to be here
 	allow = $conf.get("static.allow") ? []

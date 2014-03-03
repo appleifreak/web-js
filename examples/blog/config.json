@@ -5,8 +5,11 @@
 	},
 	"http": {
 		"allow": [
-			"!templates{/**,}",
-			"!lib{/**,}"
+			"!/templates{/**,}",
+			"!/lib{/**,}"
+		],
+		"rewrite": [
+			[ "a/(.*)", "articles/$1", "i" ]
 		]
 	},
 	"sandbox": {

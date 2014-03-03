@@ -36,7 +36,7 @@ conf = convict
 			arg: "port"
 			env: "PORT"
 		ignore:
-			doc: "Glob patterns for filenames that will always return 404."
+			doc: "Glob patterns for request path parts that will always return 404."
 			format: Array
 			default: [ "node_modules", ".*", "package.json" ]
 		index:
@@ -55,6 +55,14 @@ conf = convict
 			doc: "Enable gzip compression."
 			format: Boolean
 			default: false
+		rewrite:
+			doc: "Redirect requests by matching file paths."
+			format: Array
+			default: []
+		middleware:
+			doc: "List of connect middleware to use. First checks Express variable, then does regular require. Executes after rewriter/core and before the sanbox/static servers."
+			format: Array
+			default: []
 
 	static:
 		enabled:

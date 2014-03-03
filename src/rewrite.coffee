@@ -16,11 +16,25 @@ module.exports = (req, res, next) ->
 
 	# return 403 on denied routes
 	# relPath = path.relative "/", req.path
-	return next new HTTPError 403 unless isQueryMatch req.path.substr(1), $conf.get("http.allow")
+	return next new HTTPError 403 unless isQueryMatch req.path, $conf.get("http.allow")
 
 	# get the true filename by cwd
 	req.filename = path.join $conf.get("cwd"), req.path
-	return next() unless fs.existsSync req.filename
+	req.relative = path.relative $conf.get("cwd"), req.filename
+
+	# rewrite request paths
+	_.some $conf.get("http.rewrite"), (r) ->
+		return unless _.isArray(r)
+		
+		if r.length is 3 then reg = new RegExp r[0], r[2]
+		else if r.length is 2 then reg = new RegExp r[0]
+		return unless reg? and reg.test req.filename
+
+		req.filename = req.filename.replace reg, r[1]
+		return true
+
+	# check if it actually exists
+	return next() unless fs.existsSync 
 	req.stat = fs.statSync(req.filename)
 
 	# adjust filename for directories
@@ -30,10 +44,8 @@ module.exports = (req, res, next) ->
 
 		if index?
 			req.filename = path.join req.filename, index
+			req.relative = path.relative $conf.get("cwd"), req.filename
 			req.stat = fs.statSync(req.filename)
-
-	# relative file name
-	req.relative = path.relative $conf.get("cwd"), req.filename
 	
 	# continue
 	next()
