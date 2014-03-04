@@ -1,7 +1,7 @@
 {
 	"site": {
 		"title": "My Blog",
-		"style": "foghorn.css"
+		"style": "/foghorn.css"
 	},
 	"http": {
 		"allow": [
@@ -9,7 +9,7 @@
 			"!/lib{/**,}"
 		],
 		"rewrite": [
-			[ "a/(.*)", "articles/$1", "i" ]
+			[ "^a/(.*)", "articles/$1", "i" ]
 		]
 	},
 	"sandbox": {

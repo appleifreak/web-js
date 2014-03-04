@@ -14,7 +14,7 @@ html = _.template """<!DOCTYPE html>
 		<% if ($.style == null) $.style = [];
 		if (!Array.isArray($.style)) $.style = [ $.style ];
 		$.style.forEach(function(s) { %>
-		<link rel="stylesheet" href="<%= $resolvePath(s) %>" type="text/css" />
+		<link rel="stylesheet" href="<%= $url(s) %>" type="text/css" />
 		<% }); %>
 	</head>
 	<body>
@@ -70,9 +70,9 @@ module.exports = (options) ->
 		_.defaults meta, options.template_data ? {}
 
 		# parse the body
-		md = parts.join(options.content_break + "\n")
-		body = marked md, options
-		data = _.extend meta, { body }
+		markdown = parts.join(options.content_break + "\n")
+		body = marked markdown, options
+		data = _.extend meta, { body, markdown }
 
 		return data
 		

@@ -28,13 +28,14 @@ module.exports = (req, res, next) ->
 		
 		if r.length is 3 then reg = new RegExp r[0], r[2]
 		else if r.length is 2 then reg = new RegExp r[0]
-		return unless reg? and reg.test req.filename
+		return unless reg? and reg.test req.relative
 
-		req.filename = req.filename.replace reg, r[1]
+		req.relative = req.relative.replace reg, r[1]
+		req.filename = path.resolve $conf.get("cwd"), req.relative
 		return true
 
 	# check if it actually exists
-	return next() unless fs.existsSync 
+	return next() unless fs.existsSync req.filename
 	req.stat = fs.statSync(req.filename)
 
 	# adjust filename for directories

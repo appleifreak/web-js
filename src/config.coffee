@@ -107,7 +107,7 @@ conf = convict
 		cache:
 			doc: "If enabled, sends etag and last modified headers to save on duplicate requests."
 			format: Boolean
-			default: true
+			default: false
 
 # resolve the cwd
 cwd = path.resolve conf.get("cwd")

@@ -29,6 +29,10 @@ exports.stripIndex = (filepath) ->
 
 # generate sandbox context
 exports.generate = (req, res, next) ->
+	resolvePath = do ->
+		dirname = path.dirname path.join "/", req.relative
+		(p) -> path.resolve(dirname, stripIndex p).substr(1)
+
 	$request: req
 	$response: res
 	$next: next
@@ -48,12 +52,12 @@ exports.generate = (req, res, next) ->
 		res.write vals.join(" ") + "\n", "utf-8"
 		return
 
-	# dynamic urls
-	$resolvePath: do ->
-		dirpath = path.dirname path.join "/", req.relative
+	# dynamic paths
+	$resolvePath: resolvePath
+	$url: do ->
 		base = $conf.get("http.url_base") ? ""
-		if base.substr(-1) is "/" then base = base.substr 0, base.length - 1
-		(p) -> base + path.resolve dirpath, stripIndex p
+		if base.substr(-1) isnt "/" then base += "/"
+		(p) -> base + resolvePath p
 
 exports.basicWrapper = (src, type = "html") ->
 	return """module.exports=#{src};
@@ -68,13 +72,34 @@ exports.basicWrapper = (src, type = "html") ->
 md5 =
 exports.md5 = (v) -> crypto.createHash("md5").update(v).digest("hex")
 
-exports.cacheControl = (req, res) ->
-	res.set 'ETag', md5 req.method + req.url + req.stat.mtime + req.stat.size
-	res.set "Last-Modified", req.stat.mtime.toUTCString()
-	
-	if fresh req.headers, res._headers
-		res.writeHead(304)
-		res.end()
-		return true
+rand =
+exports.rand = do ->
+	depth = 4
+	reducer = (m, h, i, l) -> m + parseInt(h, 16) * Math.pow(16, i)
 
-	return false
+	(min, max) ->
+		bytes = crypto.randomBytes(depth).toString("hex").split("").reverse()
+		num = _.reduce bytes, reducer, 0
+		rando = num / Math.pow 256, depth
+
+		unless min? then return rando
+		unless max? then [max, min] = [min, 0]
+		if max < min then [min, max] = [max, min]
+		return Math.floor(rando * (max - min)) + min
+
+randId =
+exports.randId = (n = 6) -> rand Math.pow(10, n-1), Math.pow(10, n)
+
+exports.cacheControl = do ->
+	instanceId = randId()
+
+	(req, res) ->
+		res.set 'ETag', md5 req.method + req.url + req.stat.mtime + req.stat.size + instanceId
+		res.set "Last-Modified", req.stat.mtime.toUTCString()
+		
+		if fresh req.headers, res._headers
+			res.writeHead(304)
+			res.end()
+			return true
+
+		return false

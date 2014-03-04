@@ -8,17 +8,18 @@ var _ = require("underscore"),
 var markdown = web.transformers.markdown,
 	parse = markdown.fn.parse;
 
-var templateData = $config.site || {},
-	cwd = $config.cwd;
+var templateData = $config.site || {};
 
-glob("articles/*{/index,}.+(md|markdown)", { cwd: cwd })
+glob("articles/*{/index,}.+(md|markdown)", { cwd: __dirname })
 	.map(function(file) {
-		return readFile(cwd + "/" + file, "utf-8")
+		filename = __dirname + "/" + file;
+
+		return readFile(filename, "utf-8")
 			.then(parse)
 			.then(function(data) {
 				data.date = new Date(data.date);
-				data.file = file;
-				data.url = $resolvePath(file);
+				data.file = filename;
+				data.url = $url(file);
 				return data;
 			});
 	})
