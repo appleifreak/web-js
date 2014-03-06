@@ -1,23 +1,22 @@
-cluster = require 'cluster'
+_ = require "underscore"
+path = require "path"
 
-# make conf global
-$conf =
-global.$conf = require "./config"
+# api for loading config and initiating express app
+module.exports = (opts...) ->
+	# load config
+	conf = require "./config"
 
-# fire up the cores
-if cluster.isMaster
-	threads = $conf.get("threads")
-	cluster.fork() for [0...threads]
-	console.log "Started #{threads} workers."
+	# apply user settings
+	opts.forEach (o) ->
+		if _.isObject(o) then conf.load o
+		else if _.isString(o)
+			conf.loadFile path.resolve conf.get("cwd"), o
 
-	waiting = threads
-	for id, w of cluster.workers
-		w.on "message", (msg) ->
-			if msg is "READY" then waiting--
-			if waiting is 0 then console.log "HTTP server listening on port #{$conf.get "http.port"}."
+	# absoluteify the cwd
+	conf.set "cwd", path.resolve conf.get "cwd"
 
-	cluster.on 'exit', (worker, code, signal) ->
-		console.log "Worker #{worker.process.pid} died."
+	# validate the config
+	conf.validate()
 
-else
-	require "./init"
+	# get the express app and export
+	return require "./init"

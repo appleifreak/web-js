@@ -3,10 +3,11 @@ fs = require "fs"
 path = require "path"
 less = require "less"
 {basicWrapper} = require "../helpers"
+conf = require "../config"
 
 module.exports = (options) ->
 	_.defaults options, extensions: [ ".less" ]
-	cwd = $conf.get("cwd")
+	cwd = conf.get("cwd")
 
 	t = (_module, filename) ->
 		text = fs.readFileSync filename, 'utf-8'

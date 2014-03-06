@@ -3,6 +3,7 @@ marked = require "marked"
 fs = require "fs"
 path = require "path"
 {basicWrapper} = require "../helpers"
+conf = require "../config"
 
 html = _.template """<!DOCTYPE html>
 <html lang="en-US">
@@ -79,7 +80,7 @@ module.exports = (options) ->
 	render =
 	t.render = (data) ->
 		tpl = options.template
-		unless _.isEmpty(tpl) then tpl = path.resolve $conf.get("cwd"), tpl
+		unless _.isEmpty(tpl) then tpl = path.resolve conf.get("cwd"), tpl
 		else tpl = options.template_data.template
 		if _.isEmpty(tpl) then tpl = html.source
 		else tpl = """require("#{unless /^\.{0,2}\//.test(tpl) then "./" else ""}#{tpl}")"""

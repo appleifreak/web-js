@@ -8,6 +8,9 @@ vm = require "vm"
 path = require 'path'
 assert = require 'assert'
 
+# keep things dry
+$pkg = require "../package.json"
+
 # we don't have NativeModule like Module does, so we improvise
 coreModules = [ "assert", "buffer", "child_process", "cluster", "console", "constants", "crypto", "dgram", "dns", "domain", "events", "freelist", "fs", "http", "https", "module", "net", "os", "path", "punycode", "querystring", "readline", "repl", "smalloc", "stream", "string_decoder", "sys", "timers", "tls", "tracing", "tty", "url", "util", "vm", "zlib" ]
 isCoreModule = (mod) -> coreModules.indexOf(mod) > -1
@@ -221,7 +224,7 @@ module.exports = (main, sandbox) ->
 				return require filename
 
 			# requiring web-js is bad so instead we return good things
-			if filename is _pkg.name then return webjs
+			if filename is $pkg.name then return webjs
 
 			module = new Module filename, parent
 
@@ -243,7 +246,7 @@ module.exports = (main, sandbox) ->
 			return module.exports
 
 		@_resolveFilename = (request, parent) ->
-			if isCoreModule(request) or request is _pkg.name
+			if isCoreModule(request) or request is $pkg.name
 				return request
 
 			resolvedModule = Module._resolveLookupPaths request, parent

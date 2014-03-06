@@ -3,6 +3,7 @@ _ = require "underscore"
 path = require "path"
 fresh = require "fresh"
 crypto = require "crypto"
+conf = require "./config"
 
 isMatch =
 exports.isMatch = (filename, pattern) ->
@@ -23,7 +24,7 @@ exports.isQueryMatch = (filename, rules) ->
 stripIndex =
 exports.stripIndex = (filepath) ->
 	name = path.basename filepath
-	if _.some($conf.get("http.index"), (p) -> isMatch name, p)
+	if _.some(conf.get("http.index"), (p) -> isMatch name, p)
 		filepath = path.dirname filepath
 	return filepath
 
@@ -55,7 +56,7 @@ exports.generate = (req, res, next) ->
 	# dynamic paths
 	$resolvePath: resolvePath
 	$url: do ->
-		base = $conf.get("http.url_base") ? ""
+		base = conf.get("http.url_base") ? ""
 		if base.substr(-1) isnt "/" then base += "/"
 		(p) -> base + resolvePath p
 

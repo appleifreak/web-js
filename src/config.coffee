@@ -1,39 +1,24 @@
 convict = require 'convict'
-path = require 'path'
-fs = require 'fs'
 
+# convict schema
 module.exports =
 conf = convict
 	env:
 		doc: "Node environment."
 		format: [ "development", "production" ]
 		default: "development"
-		arg: "env"
 		env: "NODE_ENV"
-	threads:
-		doc: "The number of threads to launch on."
-		format: "int"
-		default: require('os').cpus().length
-		arg: "threads"
-		env: "NODE_THREADS"
-	config:
-		doc: "JSON configuration file path relative to the current working directory."
-		format: Array
-		default: [ "config.json", "config.js" ]
-		arg: "config"
-		env: "NODE_CONFIG"
 	cwd:
 		doc: "The current working directory."
 		format: String
 		default: process.cwd()
-		arg: "cwd"
 
 	http:
 		port:
 			doc: "The port to start the HTTP server on."
 			format: "port"
 			default: 3000
-			arg: "port"
+			# arg: "port"
 			env: "PORT"
 		ignore:
 			doc: "Glob patterns for request path parts that will always return 404."
@@ -108,25 +93,3 @@ conf = convict
 			doc: "If enabled, sends etag and last modified headers to save on duplicate requests."
 			format: Boolean
 			default: false
-
-# resolve the cwd
-cwd = path.resolve conf.get("cwd")
-
-# load the config file
-conf.get("config").some (filename) ->
-	configFile = path.resolve cwd, filename
-	return unless fs.existsSync(configFile)
-
-	if path.extname(configFile) is ".json" then conf.loadFile(configFile)
-	else conf.load require configFile
-	
-	allow = conf.get("http.allow")
-	allow.push "!" + path.relative cwd, configFile
-	conf.set "http.allow", allow
-	return true
-
-# make the cwd permanent
-conf.set "cwd", cwd
-
-# validate and go
-conf.validate()

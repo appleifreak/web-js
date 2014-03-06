@@ -1,0 +1,99 @@
+#!/usr/bin/env node
+
+// Parse args
+var argv = require('minimist')(process.argv.slice(2), {
+	string: [ "config", "cwd" ],
+	boolean: [ "production" ],
+	alias: {
+		"p": "port",
+		"c": "config",
+		"t": "threads"
+	},
+	default: {
+		production: false,
+		cwd: process.cwd()
+	}
+});
+
+// Set the env
+if (argv.production || process.env.NODE_ENV == null) {
+	process.env.NODE_ENV =
+	env = argv.production ? "production" : "development";
+}
+
+// Default thread count by env
+if (argv.threads == null) {
+	argv.threads = env === "production" ? require("os").cpus().length : 1;
+}
+
+var cluster = require('cluster'),
+	_ = require("underscore");
+
+if (argv.threads < 2 || !cluster.isMaster) {
+
+	var path = require("path"),
+		fs = require("fs"),
+		conf = require("../lib/config");
+
+	var cwd = path.resolve(argv.cwd),
+		configFiles = _.compact([ argv.config, "web.json", "web.js" ]);
+
+	// find the config file
+	_.some(configFiles, function(filename) {
+		var configFile = path.resolve(cwd, filename);
+		if (!fs.existsSync(configFile)) return;
+
+		// Load the config
+		if (path.extname(configFile) === ".json") conf.loadFile(configFile);
+		else conf.load(require(configFile));
+
+		// Force the server to always deny config requests
+		var allow = conf.get("http.allow");
+		allow.push("!" + path.relative(cwd, configFile));
+		conf.set("http.allow", allow);
+
+		return true;
+	});
+
+	// load mandatory config
+	conf.load({
+		cwd: cwd,
+		http: _.isNumber(argv.port) ? { port: argv.port } : {},
+		env: env
+	});
+
+	var app = require("../lib/")();
+
+	app.start(function() {
+		if (!cluster.isMaster) process.send("READY");
+		else console.log("HTTP server listening...");
+	});
+
+} else {
+
+	_.times(argv.threads, function() {
+		cluster.fork();
+	});
+	console.log("Started " + argv.threads + " workers.");
+
+	var waiting = argv.threads;
+	_.values(cluster.workers).forEach(function(w) {
+		function isReady(msg) {
+			if (msg === "READY") {
+				waiting--;
+				w.removeListener("message", isReady);
+			}
+
+			if (waiting === 0) {
+				console.log("HTTP server listening...");
+			}
+		}
+
+		w.on("message", isReady);
+	});
+
+	cluster.on('exit', function(worker, code, signal) {
+		console.log("Worker " + worker.process.pid + " died.");
+	});
+
+}
