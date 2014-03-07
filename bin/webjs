@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+var cluster = require('cluster'),
+	_ = require("underscore"),
+	path = require("path");
+
 // Parse args
 var argv = require('minimist')(process.argv.slice(2), {
 	string: [ "config", "cwd" ],
@@ -20,8 +24,8 @@ if (process.env.NODE_ENV == null) process.env.NODE_ENV = "development";
 if (argv.production) process.env.NODE_ENV = "production";
 var env = process.env.NODE_ENV;
 
-var cluster = require('cluster'),
-	_ = require("underscore");
+// resolve cwd
+var cwd = path.resolve(argv.cwd);
 
 if (cluster.isMaster) {
 
@@ -62,19 +66,17 @@ if (cluster.isMaster) {
 
 	// launch all the workers
 	_.times(threads, function() {
-		cluster.fork();
+		cluster.fork({ NODE_PATH: path.join(cwd, "node_modules") });
 	});
 	
 	console.log("Started " + threads + " workers.");
 
 } else {
 
-	var path = require("path"),
-		fs = require("fs"),
+	var fs = require("fs"),
 		conf = require("../lib/config");
 
-	var cwd = path.resolve(argv.cwd),
-		configFiles = _.compact([ argv.config, "web.json", "web.js" ]);
+	var configFiles = _.compact([ argv.config, "web.json", "web.js" ]);
 
 	// find the config file
 	_.some(configFiles, function(filename) {
