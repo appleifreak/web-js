@@ -1,6 +1,6 @@
 {
 	"name": "web-js",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"scripts": {
 		"dev": "nodemon -w ./lib/ ./lib/ -- --cwd ./examples/blog/ --threads 1",
 		"build": "./node_modules/coffee-script/bin/coffee -o lib/ --no-header -cwb src/"
