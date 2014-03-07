@@ -18,7 +18,6 @@ conf = convict
 			doc: "The port to start the HTTP server on."
 			format: "port"
 			default: 3000
-			# arg: "port"
 			env: "PORT"
 		ignore:
 			doc: "Glob patterns for request path parts that will always return 404."
