@@ -19,21 +19,27 @@ class global.HTTPError
 module.exports =
 app = express()
 
+# load plugins
+_.each conf.get("plugins"), (options, name) ->
+	unless _.isObject(options) then options = [ options ]
+	if /^\.{0,2}\//.test(name) then plugin = require path.resolve conf.get("cwd"), name
+	else plugin = require name
+	if _.isFunction(plugin) then plugin.call null, app, options
+
 # default middleware
 app.use express.logger "dev"
 if conf.get "http.compress" then app.use express.compress()
 app.use require "./rewrite"
 
 # user middleware
-_.each conf.get("http.middleware"), (m) ->
-	if _.isArray(m) then [name, args...] = m
-	else [name, args] = [m, []]
+_.each conf.get("http.middleware"), (args, name) ->
+	unless _.isArray(args) then args = [ args ]
 
 	if express[name]? then mid = express[name]
-	else if /^.{0,2}\//.test(name) then mid = require path.resolve conf.get("cwd"), name
+	else if /^\.{0,2}\//.test(name) then mid = require path.resolve conf.get("cwd"), name
 	else mid = require name
 
-	if _.isFunction(mid) then app.use mid.apply null, args
+	if _.isFunction(mid) then app.use mid.apply app, args
 
 # sandbox and static files
 if conf.get "sandbox.enabled" then app.use require "./sandbox"

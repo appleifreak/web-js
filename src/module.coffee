@@ -12,7 +12,11 @@ assert = require 'assert'
 $pkg = require "../package.json"
 
 # we don't have NativeModule like Module does, so we improvise
-coreModules = [ "assert", "buffer", "child_process", "cluster", "console", "constants", "crypto", "dgram", "dns", "domain", "events", "freelist", "fs", "http", "https", "module", "net", "os", "path", "punycode", "querystring", "readline", "repl", "smalloc", "stream", "string_decoder", "sys", "timers", "tls", "tracing", "tty", "url", "util", "vm", "zlib" ]
+coreModules = [ "assert", "buffer", "child_process", "cluster", "console", "constants",
+	"crypto", "dgram", "dns", "domain", "events", "freelist", "fs", "http", "https",
+	"module", "net", "os", "path", "punycode", "querystring", "readline", "repl",
+	"smalloc", "stream", "string_decoder", "sys", "timers", "tls", "tracing", "tty",
+	"url", "util", "vm", "zlib" ]
 isCoreModule = (mod) -> coreModules.indexOf(mod) > -1
 
 # If obj.hasOwnProperty has been overridden, then calling

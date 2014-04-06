@@ -2,7 +2,7 @@
 	"name": "web-js",
 	"version": "0.3.1",
 	"scripts": {
-		"dev": "nodemon -w ./lib/ ./lib/ -- --cwd ./examples/blog/ --threads 1",
+		"dev": "nodemon -w ./lib/ ./bin/webjs -- --cwd ./examples/blog/ --threads 1",
 		"build": "./node_modules/coffee-script/bin/coffee -o lib/ --no-header -cwb src/"
 	},
 	"bin": {
