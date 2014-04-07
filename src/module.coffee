@@ -321,7 +321,7 @@ module.exports = (main, sandbox) ->
 			# yet due to the inherent fear factor.
 
 			# create wrapper function
-			# Notice how we execute in the global context and not this
+			# Notice how we execute in the _global context and not this
 			# one. This context will always run in the true global.
 			wrapper = Module.wrap content
 			compiledWrapper = vm.runInContext wrapper, _global, filename

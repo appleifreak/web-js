@@ -50,7 +50,7 @@ app.use (req, res, next) -> next new HTTPError 404
 
 # custom error handle
 app.use (err, req, res, next) ->
-	env = conf.get("env")
+	env = process.env.NODE_ENV
 	code = err.statusCode ? 500
 	msg = if code is 500 and env is "development" then err.stack else err.message
 

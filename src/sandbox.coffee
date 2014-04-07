@@ -4,7 +4,7 @@ path = require "path"
 createNewModuleContext = require "./module"
 conf = require "./config"
 
-createContext = (filename, sandbox) ->
+createContext = (filename, sandbox = {}) ->
 	_.extend sandbox, {
 		__createContext: createContext
 		$config: conf.get()

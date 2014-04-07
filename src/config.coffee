@@ -3,11 +3,6 @@ convict = require 'convict'
 # convict schema
 module.exports =
 conf = convict
-	env:
-		doc: "Node environment."
-		format: [ "development", "production" ]
-		default: "development"
-		env: "NODE_ENV"
 	cwd:
 		doc: "The current working directory."
 		format: String
@@ -22,7 +17,7 @@ conf = convict
 		port:
 			doc: "The port to start the HTTP server on."
 			format: "port"
-			default: 3000
+			default: if process.env.NODE_ENV is "development" then 3000 else 80
 			env: "PORT"
 		ignore:
 			doc: "Glob patterns for request path parts that will always return 404."

@@ -7,24 +7,25 @@ var cluster = require('cluster'),
 // Parse args
 var argv = require('minimist')(process.argv.slice(2), {
 	string: [ "config", "cwd" ],
-	boolean: [ "production" ],
+	boolean: [ "development" ],
 	alias: {
-		"p": "port",
-		"c": "config",
-		"t": "threads"
+		"development": "dev",
+		"port": "p",
+		"config": "c",
+		"threads": "t"
 	},
 	default: {
-		production: false,
+		dev: false,
 		cwd: process.cwd()
 	}
 });
 
-// Set the env
-if (process.env.NODE_ENV == null) process.env.NODE_ENV = "development";
-if (argv.production) process.env.NODE_ENV = "production";
+// Set the env; default is production
+if (process.env.NODE_ENV == null) process.env.NODE_ENV = "production";
+if (argv.development) process.env.NODE_ENV = "development";
 var env = process.env.NODE_ENV;
 
-// resolve cwd
+// resolve cwd and make it the global cwd
 var cwd = path.resolve(argv.cwd);
 
 if (cluster.isMaster) {
@@ -32,7 +33,7 @@ if (cluster.isMaster) {
 	// Get the number of workers
 	var threads = parseInt(argv.threads, 10);
 	if (isNaN(threads) || threads < 1) {
-		threads = env === "production" ? require("os").cpus().length : 1;
+		threads = env !== "development" ? require("os").cpus().length : 1;
 	}
 
 	// worker setup
@@ -74,9 +75,10 @@ if (cluster.isMaster) {
 } else {
 
 	var fs = require("fs"),
-		conf = require("../lib/config");
+		conf = require("../lib/config"),
+		configFiles = [ "web.json", "web.js" ];
 
-	var configFiles = _.compact([ argv.config, "web.json", "web.js" ]);
+	if (!_.isEmpty(argv.config)) configFiles.unshift(argv.config);
 
 	// find the config file
 	_.some(configFiles, function(filename) {
@@ -98,8 +100,7 @@ if (cluster.isMaster) {
 	// load mandatory config
 	conf.load({
 		cwd: cwd,
-		http: _.isNumber(argv.port) ? { port: argv.port } : {},
-		env: env
+		http: _.isNumber(argv.port) ? { port: argv.port } : {}
 	});
 
 	var app = require("../lib/")();

@@ -14,9 +14,11 @@ exports.isMatch = (filename, pattern) ->
 
 exports.isQueryMatch = (filename, rules) ->
 	rMatch = (rule, key) ->
-		if _.isObject(rule)
-			if key is "$or" then return _.any rule, rMatch
-			else return _.every rule, rMatch
+		if _.isObject(rule) then return switch key
+			when "$or" then _.any rule, rMatch
+			when "$not" then not _.every rule, rMatch
+			when "$nor" then not _.any rule, rMatch
+			else _.every rule, rMatch
 		return isMatch filename, rule
 
 	return rMatch rules
